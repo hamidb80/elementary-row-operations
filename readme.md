@@ -21,6 +21,8 @@ r3 <> r2
 ?
 ```
 
+the app watches for changes in the `ops.txt` and reruns when new modification detected
+
 ## Operations
 - `r1 += -3/2r1`: assigns row 1 as `r1 + -(3/2).r2` here `3/2` is rational i.e. $\frac{3}{2}$
 - `r1 *= 3`: scales row 1 by 3
