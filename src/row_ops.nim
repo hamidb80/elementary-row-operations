@@ -24,17 +24,18 @@ type
 
 # Utils ------------------------------
 
-func isInt(s: string): bool = 
+func parseRational(s: string): Number =
+  let t = s.split '/'
+  if t.len == 1: toRational parseint s
+  else: initRational(parseInt t[0], parseInt t[1])
+
+func isRational(s: string): bool =
   try:
-    let _ = parseint s
+    let _ = parseRational s
     true
   except:
     false
 
-func parseRational(s: string): Number = 
-  let t = s.split '/'
-  if t.len == 1: toRational parseint s
-  else: initRational(parseInt t[0], parseInt t[1])
 
 # Matrix Tools ------------------------------
 
@@ -76,9 +77,9 @@ proc parseOperation(l: string): Operation =
     let parts = l.splitWhitespace
     if parts.len == 0:
       Operation(kind: okNothing)
-    elif parts[0] == "?": 
+    elif parts[0] == "?":
       Operation(kind: okPrint)
-    elif isInt parts[0]: 
+    elif isRational parts[0]:
       Operation(kind: okAppendRow, row: parts.mapit(parseRational it))
     else:
       let r1 = parseRowNumber parts[0]
@@ -88,7 +89,8 @@ proc parseOperation(l: string): Operation =
         of "*=": okScale
         of "<>": okSwap
         of "?": okPrint
-        else: raise newException(ValueError, fmt"invalid operation: '{parts[0]}'")
+        else: raise newException(ValueError,
+            fmt"invalid operation: '{parts[0]}'")
 
       case k
       of okAdd:
@@ -111,27 +113,27 @@ proc parseOperation(l: string): Operation =
     echo fmt"failed to parse {l}"
     raise
 
-proc applyOperation(m: sink Matrix, op: Operation): Matrix = 
+proc applyOperation(m: sink Matrix, op: Operation): Matrix =
   # debugecho op
 
   case op.kind
   of okNothing:
     discard
-  
+
   of okPrint:
     echo ">> "
     printMatrix m
-  
+
   of okAppendRow:
     if m.height == 0 or m.width == op.row.len:
       add m, op.row
     else:
       raise newException(ValueError, fmt "the length of row does not match. the matrix size {m.height}x{m.width} but the row size is: {op.row.len} \nhere's the row: {op.row}")
-  
+
   of okScale:
     for i in 0..<m.width:
       m[op.r1-1][i] *= op.coeff
-  
+
   of okAdd:
     for i in 0..<m.width:
       m[op.r1-1][i] += op.coeff * m[op.r2-1][i]
@@ -143,7 +145,7 @@ proc applyOperation(m: sink Matrix, op: Operation): Matrix =
 
 proc doOperations(fcontent: string): Matrix =
   for l in fcontent.splitLines:
-    let op = parseOperation strip l 
+    let op = parseOperation strip l
     result = result.applyOperation op
 
 # Run ------------------------------
@@ -164,7 +166,7 @@ proc main =
         discard doOperations content
 
         echo "---------------------------"
-        
+
         lastTime = mtime
         firstTime = false
 
