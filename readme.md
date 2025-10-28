@@ -27,3 +27,10 @@ r3 <> r2
 - `r1 <> r2`: swapes row 1 and row 2
 - `?`: prints matrix so far
 - `1 2 ...`: add the row `1 2 ...` to the matrix
+
+
+## Features
+- [x] support rational numbers
+
+## Limitations
+- [ ] cannot use floating point numbers, it must be represented in rational form.

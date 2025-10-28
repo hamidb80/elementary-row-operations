@@ -36,7 +36,7 @@ func parseRational(s: string): Number =
   if t.len == 1: toRational parseint s
   else: initRational(parseInt t[0], parseInt t[1])
 
-# Matrix ------------------------------
+# Matrix Tools ------------------------------
 
 func width(m: Matrix): int = m[0].len
 func height(m: Matrix): int = m.len
@@ -146,7 +146,7 @@ proc doOperations(fcontent: string): Matrix =
     let op = parseOperation strip l 
     result = result.applyOperation op
 
-# ------------------------------
+# Run ------------------------------
 
 proc main =
   if paramCount() == 1:
