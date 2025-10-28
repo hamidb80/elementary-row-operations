@@ -2,6 +2,8 @@
 
 originally created for inspecting the mistakes in Linear Algebra course done by students.
 
+it is inspired by [Jello](https://www.youtube.com/watch?v=tNaZykHHHWs) and Jupyter notebook.
+
 
 ## Usage
 
