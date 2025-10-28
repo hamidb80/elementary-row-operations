@@ -1,4 +1,4 @@
-import std/[strutils, strformat, rationals, sequtils, os, times]
+import std/[strutils, strformat, rationals, sequtils, os, times, terminal]
 
 # Types ------------------------------
 
@@ -60,47 +60,51 @@ func parseRowNumber(s: string): int =
   of 'r': parseInt s.substr(1)
   else: raise newException(ValueError, fmt"invalid row number: {s}")
 
-func parseOperation(l: string): Operation =
+proc parseOperation(l: string): Operation =
   # r1 += -3r1 // r1 <-- r1 -3.r2
   # r1 *= 3    // r1 <-- 3.r1
   # r1 <> r2   // [itself]
   # ?          // prints the whole matrix
   # 1 2 ...    // add this row to the matrix
 
-  let parts = l.splitWhitespace
-  if parts.len == 0:
-    Operation(kind: okNothing)
-  elif parts[0] == "?": 
-    Operation(kind: okPrint)
-  elif isInt parts[0]: 
-    Operation(kind: okAppendRow, row: parts.mapit(toRational parseint it))
-  else:
-    let r1 = parseRowNumber parts[0]
-    let k =
-      case parts[1]
-      of "+=": okAdd
-      of "*=": okScale
-      of "<>": okSwap
-      of "?": okPrint
-      else: raise newException(ValueError, fmt"invalid operation: '{parts[0]}'")
-
-    case k
-    of okAdd:
-      let term = parts[2].split('r')
-      let c = toRational parseInt term[0]
-      let r2 = parseInt term[1]
-      Operation(kind: k, r1: r1, r2: r2, coeff: c)
-
-    of okScale:
-      let c = toRational parseInt parts[2]
-      Operation(kind: k, r1: r1, coeff: c)
-
-    of okSwap:
-      let r2 = parseRowNumber parts[2]
-      Operation(kind: k, r1: r1, r2: r2)
-
+  try:
+    let parts = l.splitWhitespace
+    if parts.len == 0:
+      Operation(kind: okNothing)
+    elif parts[0] == "?": 
+      Operation(kind: okPrint)
+    elif isInt parts[0]: 
+      Operation(kind: okAppendRow, row: parts.mapit(toRational parseint it))
     else:
-      raiseAssert "unreachable"
+      let r1 = parseRowNumber parts[0]
+      let k =
+        case parts[1]
+        of "+=": okAdd
+        of "*=": okScale
+        of "<>": okSwap
+        of "?": okPrint
+        else: raise newException(ValueError, fmt"invalid operation: '{parts[0]}'")
+
+      case k
+      of okAdd:
+        let term = parts[2].split('r')
+        let c = toRational parseInt term[0]
+        let r2 = parseInt term[1]
+        Operation(kind: k, r1: r1, r2: r2, coeff: c)
+
+      of okScale:
+        let c = toRational parseInt parts[2]
+        Operation(kind: k, r1: r1, coeff: c)
+
+      of okSwap:
+        let r2 = parseRowNumber parts[2]
+        Operation(kind: k, r1: r1, r2: r2)
+
+      else:
+        raiseAssert "unreachable"
+  except:
+    echo fmt"failed to parse {l}"
+    raise
 
 proc applyOperation(m: sink Matrix, op: Operation): Matrix = 
   # debugecho op
@@ -117,7 +121,7 @@ proc applyOperation(m: sink Matrix, op: Operation): Matrix =
     if m.height == 0 or m.width == op.row.len:
       add m, op.row
     else:
-      raise newException(ValueError, fmt"the length of row does not match. the matrix size {m.height}x{m.width} but given {op.row.len}.")
+      raise newException(ValueError, fmt "the length of row does not match. the matrix size {m.height}x{m.width} but the row size is: {op.row.len} \nhere's the row: {op.row}")
   
   of okScale:
     for i in 0..<m[op.r1].len:
@@ -149,8 +153,11 @@ proc main =
     while true:
       let mtime = getLastModificationTime fpath
       if firstTime or mtime > lastTime:
+        eraseScreen stdout
+
         let content = readFile fpath
         discard doOperations content
+
         echo "---------------------------"
         stdout.flushFile
         
