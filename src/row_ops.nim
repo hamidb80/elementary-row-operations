@@ -164,7 +164,6 @@ proc main =
         discard doOperations content
 
         echo "---------------------------"
-        stdout.flushFile
         
         lastTime = mtime
         firstTime = false
