@@ -22,8 +22,8 @@ r3 <> r2
 ```
 
 ## Operations
-- `r1 += -3r1` // r1 <-- r1 -3.r2
-- `r1 *= 3`    // r1 <-- 3.r1
-- `r1 <> r2`   // swapes row 1 and row 2
-- `?`          // prints matrix so far
-- `1 2 ...`    // add the row `1 2 ...` to the matrix
+- `r1 += -3r1`: r1 <-- r1 -3.r2
+- `r1 *= 3`: r1 <-- 3.r1
+- `r1 <> r2`: swapes row 1 and row 2
+- `?`: prints matrix so far
+- `1 2 ...`: add the row `1 2 ...` to the matrix
