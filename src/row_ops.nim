@@ -31,6 +31,11 @@ func isInt(s: string): bool =
   except:
     false
 
+func parseRational(s: string): Number = 
+  let t = s.split '/'
+  if t.len == 1: toRational parseint s
+  else: initRational(parseInt t[0], parseInt t[1])
+
 # Matrix ------------------------------
 
 func width(m: Matrix): int = m[0].len
@@ -74,7 +79,7 @@ proc parseOperation(l: string): Operation =
     elif parts[0] == "?": 
       Operation(kind: okPrint)
     elif isInt parts[0]: 
-      Operation(kind: okAppendRow, row: parts.mapit(toRational parseint it))
+      Operation(kind: okAppendRow, row: parts.mapit(parseRational it))
     else:
       let r1 = parseRowNumber parts[0]
       let k =
@@ -88,12 +93,12 @@ proc parseOperation(l: string): Operation =
       case k
       of okAdd:
         let term = parts[2].split('r')
-        let c = toRational parseInt term[0]
+        let c = parseRational term[0]
         let r2 = parseInt term[1]
         Operation(kind: k, r1: r1, r2: r2, coeff: c)
 
       of okScale:
-        let c = toRational parseInt parts[2]
+        let c = parseRational parts[2]
         Operation(kind: k, r1: r1, coeff: c)
 
       of okSwap:
@@ -124,11 +129,11 @@ proc applyOperation(m: sink Matrix, op: Operation): Matrix =
       raise newException(ValueError, fmt "the length of row does not match. the matrix size {m.height}x{m.width} but the row size is: {op.row.len} \nhere's the row: {op.row}")
   
   of okScale:
-    for i in 0..<m[op.r1].len:
+    for i in 0..<m.width:
       m[op.r1-1][i] *= op.coeff
   
   of okAdd:
-    for i in 0..<m[op.r1].len:
+    for i in 0..<m.width:
       m[op.r1-1][i] += op.coeff * m[op.r2-1][i]
 
   of okSwap:

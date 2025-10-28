@@ -13,16 +13,16 @@ open a file like `ops.txt` and then run the app by `app ops.txt`, here's the exa
 0 1 4 -4
 
 r2 += -3r3
-r1 += -3r2
+r1 += 3r2
 r1 <> r2
-r2 += -7r3
+r2 += -7/4r3
 r3 <> r2
 
 ?
 ```
 
 ## Operations
-- `r1 += -3r1`: assigns row 1 as `r1 + -3.r2`
+- `r1 += -3/2r1`: assigns row 1 as `r1 + -(3/2).r2` here `3/2` is rational i.e. $\frac{3}{2}$
 - `r1 *= 3`: scales row 1 by 3
 - `r1 <> r2`: swapes row 1 and row 2
 - `?`: prints matrix so far
