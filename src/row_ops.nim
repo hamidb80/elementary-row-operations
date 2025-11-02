@@ -24,13 +24,13 @@ type
     coeff: Number
     row: Row
 
+  # OperationErrorKind = enum
+
+
 # Utils ------------------------------
 
 func even(n: int): bool = 
   n mod 2 == 0
-
-func odd(n: int): bool = 
-  not even n
 
 func parseRational(s: string): Number =
   if s.isEmptyOrWhitespace: toRational 1
@@ -87,19 +87,22 @@ proc parseOperation(l: string): Operation =
   # r1 *= 3    // r1 <-- 3.r1
   # r1 <> r2   // [itself]
   # ?          // prints the whole matrix
+  # t          // transpose
+  # mx         // mirror x
+  # my         // mirror y
   # 1 2 ...    // add this row to the matrix
 
   try:
     let parts = l.strip.splitWhitespace
 
     case parts[0]
-    of "?":
+    of "?", "show", "print":
       Operation(kind: okPrint)
-    of "t":
+    of "t", "transpose":
       Operation(kind: okTranspose)
-    of "mx":
+    of "mx", "mirrorx":
       Operation(kind: okMirrorX)
-    of "my":
+    of "my", "mirrory":
       Operation(kind: okMirrorY)
     elif isRational parts[0]:
       Operation(kind: okAppendRow, row: parts.mapit(parseRational it))
@@ -136,6 +139,8 @@ proc parseOperation(l: string): Operation =
 
 proc applyOperation(m: sink Matrix, op: Operation): Matrix =
   # debugecho op
+
+  # TODO check existance of row
 
   case op.kind
   of okPrint:
