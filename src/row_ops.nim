@@ -48,17 +48,22 @@ func isRational(s: string): bool =
   except:
     false
 
-
 # Matrix Tools ------------------------------
 
-func width(m: Matrix): int = m[0].len
-func height(m: Matrix): int = m.len
+func width(m: Matrix): int = 
+  m[0].len
+
+func height(m: Matrix): int = 
+  m.len
+
+func empty(m: Matrix): bool = 
+  m.height == 0 or m.width == 0
 
 func initMatrix(rows, cols: int, dflt: Number = 0.toRational): Matrix = 
   let r = newSeqWith(cols, dflt)
   newSeqWith(rows, r)
 
-proc printMatrix(m: Matrix) =
+proc toHumanReadable(m: Matrix): string =
   var acc: seq[string]
 
   for row in m:
@@ -72,9 +77,9 @@ proc printMatrix(m: Matrix) =
   for y in 0..<m.height:
     for x in 0..<m.width:
       let i = y * m.width + x
-      stdout.write acc[i].align maxCellLen + 1
-    stdout.write '\n'
-  stdout.write '\n'
+      result.add acc[i].align maxCellLen + 1
+    result.add '\n'
+  result.add '\n'
 
 func parseRowNumber(s: string): int =
   # r1 // 1
@@ -145,7 +150,7 @@ proc applyOperation(m: sink Matrix, op: Operation): Matrix =
   case op.kind
   of okPrint:
     echo ">> "
-    printMatrix m
+    echo m.toHumanReadable
 
   of okAppendRow:
     if m.height == 0 or m.width == op.row.len:
