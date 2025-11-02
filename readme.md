@@ -30,6 +30,9 @@ the app watches for changes in the `ops.txt` and reruns when new modification de
 - `r1 *= 3`: scales row 1 by 3
 - `r1 <> r2`: swapes row 1 and row 2
 - `?`: prints matrix so far
+- `t`: transpose
+- `mx`: mirror to the y axis
+- `my`: mirror to the x axis
 - `1 2 ...`: add the row `1 2 ...` to the matrix
 
 

@@ -13,7 +13,9 @@ type
     okSwap
     okPrint
     okAppendRow
-    okNothing
+    okTranspose
+    okMirrorX
+    okMirrorY
 
   Operation = object
     kind: OperationKind
@@ -24,10 +26,20 @@ type
 
 # Utils ------------------------------
 
+func even(n: int): bool = 
+  n mod 2 == 0
+
+func odd(n: int): bool = 
+  not even n
+
 func parseRational(s: string): Number =
-  let t = s.split '/'
-  if t.len == 1: toRational parseint s
-  else: initRational(parseInt t[0], parseInt t[1])
+  if s.isEmptyOrWhitespace: toRational 1
+  else:
+    let t = s.split '/'
+    case t.len
+    of 1: toRational parseint s
+    of 2: initRational(parseInt t[0], parseInt t[1])
+    else: raise newException(ValueError, "inv len")
 
 func isRational(s: string): bool =
   try:
@@ -41,6 +53,10 @@ func isRational(s: string): bool =
 
 func width(m: Matrix): int = m[0].len
 func height(m: Matrix): int = m.len
+
+func initMatrix(rows, cols: int, dflt: Number = 0.toRational): Matrix = 
+  let r = newSeqWith(cols, dflt)
+  newSeqWith(rows, r)
 
 proc printMatrix(m: Matrix) =
   var acc: seq[string]
@@ -74,11 +90,17 @@ proc parseOperation(l: string): Operation =
   # 1 2 ...    // add this row to the matrix
 
   try:
-    let parts = l.splitWhitespace
-    if parts.len == 0:
-      Operation(kind: okNothing)
-    elif parts[0] == "?":
+    let parts = l.strip.splitWhitespace
+
+    case parts[0]
+    of "?":
       Operation(kind: okPrint)
+    of "t":
+      Operation(kind: okTranspose)
+    of "mx":
+      Operation(kind: okMirrorX)
+    of "my":
+      Operation(kind: okMirrorY)
     elif isRational parts[0]:
       Operation(kind: okAppendRow, row: parts.mapit(parseRational it))
     else:
@@ -88,7 +110,6 @@ proc parseOperation(l: string): Operation =
         of "+=": okAdd
         of "*=": okScale
         of "<>": okSwap
-        of "?": okPrint
         else: raise newException(ValueError,
             fmt"invalid operation: '{parts[0]}'")
 
@@ -117,9 +138,6 @@ proc applyOperation(m: sink Matrix, op: Operation): Matrix =
   # debugecho op
 
   case op.kind
-  of okNothing:
-    discard
-
   of okPrint:
     echo ">> "
     printMatrix m
@@ -141,12 +159,37 @@ proc applyOperation(m: sink Matrix, op: Operation): Matrix =
   of okSwap:
     (m[op.r1-1], m[op.r2-1]) = (m[op.r2-1], m[op.r1-1])
 
+  of okTranspose:
+    var newm = initMatrix(m.width, m.height)
+    for y in 0..<m.height:
+      for x in 0..<m.width:
+        newm[x][y] = m[y][x]
+    m = newm
+
+  of okMirrorX:
+    for y in 0..<m.height:
+      let lim = 
+        if even m.width: m.width div 2 - 1
+        else: m.width div 2 
+      for x in 0..lim:
+        swap m[y][x], m[y][m.width - x - 1]
+
+  of okMirrorY:
+    let lim =
+      if even m.height: m.height div 2 - 1
+      else: m.height div 2 
+
+    for x in 0..<m.width:
+      for y in 0..lim:
+        swap m[y][x], m[m.height - y - 1][x]
+
   m
 
 proc doOperations(fcontent: string): Matrix =
   for l in fcontent.splitLines:
-    let op = parseOperation strip l
-    result = result.applyOperation op
+    if not isEmptyOrWhitespace l:
+      let op = parseOperation l
+      result = result.applyOperation op
 
 # Run ------------------------------
 
