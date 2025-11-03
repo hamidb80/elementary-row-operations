@@ -141,7 +141,7 @@ proc parseOperation*(l: string): Operation =
       raiseAssert "unreachable"
 
 proc applyOperation*(m: sink Matrix, op: Operation): Matrix =
-  # debugecho op
+  debugecho op
 
   let rowRange = 1..m.height
 
