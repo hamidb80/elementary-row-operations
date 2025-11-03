@@ -228,7 +228,9 @@ proc main =
           echo "---------------------------"
 
         except ValueError, AssertionDefect:
-          echo "[ERROR]: ", getCurrentExceptionMsg()
+          let msg = getCurrentExceptionMsg()
+          let cuti = msg.find ')'
+          echo "[ERROR]: ", msg.substr cuti+1
 
         lastTime = mtime
         firstTime = false
