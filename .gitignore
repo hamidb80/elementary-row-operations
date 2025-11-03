@@ -1,2 +1,7 @@
+temp/
+play/
+dist/
+
 play.*
 *.exe
+*.js
