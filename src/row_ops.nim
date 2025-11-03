@@ -145,7 +145,15 @@ proc parseOperation(l: string): Operation =
 proc applyOperation(m: sink Matrix, op: Operation): Matrix =
   # debugecho op
 
-  # TODO check existance of row
+  let rowRange = 1..m.height
+
+  if op.kind in {okSwap, okAdd, okScale}:
+    doAssert op.r1 in rowRange, fmt"the row number {op.r1} is not in range of the matrix i.e. {rowRange}"
+
+  if op.kind in {okSwap, okAdd}:
+    doAssert op.r2 in rowRange, fmt"the row number {op.r2} is not in range of the matrix i.e. {rowRange}"
+
+  # ----------------------------------
 
   case op.kind
   of okPrint:
@@ -153,10 +161,8 @@ proc applyOperation(m: sink Matrix, op: Operation): Matrix =
     echo m.toHumanReadable
 
   of okAppendRow:
-    if m.height == 0 or m.width == op.row.len:
-      add m, op.row
-    else:
-      raise newException(ValueError, fmt "the length of row does not match. the matrix size {m.height}x{m.width} but the row size is: {op.row.len} \nhere's the row: {op.row}")
+    doAssert m.height == 0 or m.width == op.row.len, fmt "the length of row does not match. the matrix size {m.height}x{m.width} but the row size is: {op.row.len} \nhere's the row: {op.row}"
+    add m, op.row
 
   of okScale:
     for i in 0..<m.width:
@@ -215,13 +221,18 @@ proc main =
       if firstTime or mtime > lastTime:
         eraseScreen stdout
 
-        let content = readFile fpath
-        discard doOperations content
+        try:
+          let content = readFile fpath
+          discard doOperations content
 
-        echo "---------------------------"
+          echo "---------------------------"
+
+        except ValueError, AssertionDefect:
+          echo "[ERROR]: ", getCurrentExceptionMsg()
 
         lastTime = mtime
         firstTime = false
+        
 
   else:
     echo "\n\tUSAGE: app path/to/operations.txt\n"
