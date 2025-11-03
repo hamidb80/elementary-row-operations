@@ -102,11 +102,11 @@ proc parseOperation(l: string): Operation =
   case parts[0]
   of "?", "show", "print":
     Operation(kind: okPrint)
-  of "t", "transpose":
+  of "t", "T", "transpose":
     Operation(kind: okTranspose)
-  of "mx", "mirrorx":
+  of "mx", "MX", "mirrorx":
     Operation(kind: okMirrorX)
-  of "my", "mirrory":
+  of "my", "MY", "mirrory":
     Operation(kind: okMirrorY)
   elif isRational parts[0]:
     Operation(kind: okAppendRow, row: parts.mapit(parseRational it))
