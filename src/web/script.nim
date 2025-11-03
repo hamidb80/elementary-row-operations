@@ -8,6 +8,17 @@ include karax / prelude
 
 var printed: seq[kstring] = @[]
 var errormsg: string
+var tinput = """
+1 2 3
+4 5 6
+7 8 9
+
+t
+?
+
+r1 <> r3
+?
+"""
 
 
 proc doOperations(fcontent: string): Matrix =
@@ -21,6 +32,13 @@ proc doOperations(fcontent: string): Matrix =
         printed.add result.toHumanReadable
       else:
         result = result.applyOperation op
+
+proc runOps = 
+  try:
+    discard doOperations tinput
+    errormsg = ""
+  except:
+    errormsg =  getCurrentExceptionMsg()
 
 
 proc createDom(): VNode =
@@ -86,24 +104,10 @@ proc createDom(): VNode =
 
       textarea:
         proc oninput(ev: Event; n: VNode) =
-          let k = n.value
-          try:
-            discard doOperations ($k)
-            errormsg = ""
-          except:
-            errormsg =  getCurrentExceptionMsg()
+          tinput = $n.value
+          runOps()
 
-        text """1 2 3
-4 5 6
-7 8 9
-10 11 12
-
-t
-?
-
-r1 <> r3
-?
-"""
+        text tinput
 
       if errormsg.len != 0:
         pre:
