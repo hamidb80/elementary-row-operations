@@ -230,7 +230,7 @@ proc main =
         except ValueError, AssertionDefect:
           let msg = getCurrentExceptionMsg()
           let cuti = msg.find ')'
-          echo "[ERROR]: ", msg.substr cuti+1
+          echo "[ERROR]: ", msg.substr cuti+2
 
         lastTime = mtime
         firstTime = false
