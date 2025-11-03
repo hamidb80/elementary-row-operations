@@ -97,50 +97,51 @@ proc parseOperation(l: string): Operation =
   # my         // mirror y
   # 1 2 ...    // add this row to the matrix
 
-  try:
-    let parts = l.strip.splitWhitespace
+  let parts = l.strip.splitWhitespace
 
-    case parts[0]
-    of "?", "show", "print":
-      Operation(kind: okPrint)
-    of "t", "transpose":
-      Operation(kind: okTranspose)
-    of "mx", "mirrorx":
-      Operation(kind: okMirrorX)
-    of "my", "mirrory":
-      Operation(kind: okMirrorY)
-    elif isRational parts[0]:
-      Operation(kind: okAppendRow, row: parts.mapit(parseRational it))
+  case parts[0]
+  of "?", "show", "print":
+    Operation(kind: okPrint)
+  of "t", "transpose":
+    Operation(kind: okTranspose)
+  of "mx", "mirrorx":
+    Operation(kind: okMirrorX)
+  of "my", "mirrory":
+    Operation(kind: okMirrorY)
+  elif isRational parts[0]:
+    Operation(kind: okAppendRow, row: parts.mapit(parseRational it))
+  else:
+    let r1 = 
+      if 'r' in parts[0]:
+        parseRowNumber parts[0]
+      else: raise newException(ValueError,
+          fmt"invalid command: '{parts[0]}'")
+
+    let k =
+      case parts[1]
+      of "+=": okAdd
+      of "*=": okScale
+      of "<>": okSwap
+      else: raise newException(ValueError,
+          fmt"invalid operation: '{parts[0]}'")
+
+    case k
+    of okAdd:
+      let term = parts[2].split('r')
+      let c = parseRational term[0]
+      let r2 = parseInt term[1]
+      Operation(kind: k, r1: r1, r2: r2, coeff: c)
+
+    of okScale:
+      let c = parseRational parts[2]
+      Operation(kind: k, r1: r1, coeff: c)
+
+    of okSwap:
+      let r2 = parseRowNumber parts[2]
+      Operation(kind: k, r1: r1, r2: r2)
+
     else:
-      let r1 = parseRowNumber parts[0]
-      let k =
-        case parts[1]
-        of "+=": okAdd
-        of "*=": okScale
-        of "<>": okSwap
-        else: raise newException(ValueError,
-            fmt"invalid operation: '{parts[0]}'")
-
-      case k
-      of okAdd:
-        let term = parts[2].split('r')
-        let c = parseRational term[0]
-        let r2 = parseInt term[1]
-        Operation(kind: k, r1: r1, r2: r2, coeff: c)
-
-      of okScale:
-        let c = parseRational parts[2]
-        Operation(kind: k, r1: r1, coeff: c)
-
-      of okSwap:
-        let r2 = parseRowNumber parts[2]
-        Operation(kind: k, r1: r1, r2: r2)
-
-      else:
-        raiseAssert "unreachable"
-  except:
-    echo fmt"failed to parse {l}"
-    raise
+      raiseAssert "unreachable"
 
 proc applyOperation(m: sink Matrix, op: Operation): Matrix =
   # debugecho op
@@ -230,7 +231,7 @@ proc main =
         except ValueError, AssertionDefect:
           let msg = getCurrentExceptionMsg()
           let cuti = msg.find ')'
-          echo "[ERROR]: ", msg.substr cuti+2
+          echo "[ERROR]: ", msg.substr cuti+1
 
         lastTime = mtime
         firstTime = false
